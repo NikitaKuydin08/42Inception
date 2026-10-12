@@ -1,0 +1,47 @@
+
+#specifies the different services (images) to use
+services:
+  wordpress:
+    build: requirements/wordpress
+    container_name: wordpress
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    expose:
+      - "9000"
+    networks:
+      default: {}
+    # secrets:
+    #   - wordpress
+    #   - database
+    
+  mariadb:
+    build: requirements/mariadb
+    container_name: mariadb
+    restart: unless-stopped
+    expose:
+      - "3306"
+    networks:
+      default: {}
+    # secrets:
+    #   - database
+
+  nginx:
+    build: requirements/nginx
+    container_name: nginx
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    networks:
+      default: {}
+
+networks:
+  default: {}
+
+# secrets:
+#   database:
+#     file: ./secrets/db_credentials.txt
+#   wordpress:
+#     file: ./secrets/wp_credentials.txt

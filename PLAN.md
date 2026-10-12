@@ -65,6 +65,10 @@ Target: 125% (mandatory + full bonus). Rule that governs the whole order below: 
 - [ ] Ideally: have someone else try to break it (peer review, per the subject's own AI-instructions chapter)
 - [ ] **Do not proceed past this day until mandatory is airtight**
 
+
+
+
+
 ## Day 11 — Sep 29 — Bonus: Redis + Adminer
 - [ ] Redis cache container, wire into WordPress (plugin or manual config)
 - [ ] Adminer container, confirm it can reach MariaDB
@@ -76,6 +80,11 @@ Target: 125% (mandatory + full bonus). Rule that governs the whole order below: 
 ## Day 13 — Oct 1 — Bonus: 5th service + integration
 - [ ] Pick and justify a 5th service (be ready to defend the choice)
 - [ ] Full bonus integration test alongside mandatory — nothing broken by the additions
+
+
+
+
+
 
 ## Day 14 — Oct 2 — Docs + defense prep
 - [ ] `README.md` — italic first line, Description, Instructions, Resources (incl. how AI was used, for which tasks), plus the required VM-vs-Docker / secrets-vs-env / network-vs-host / volumes-vs-bind-mounts comparisons
