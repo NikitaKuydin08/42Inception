@@ -74,3 +74,7 @@ specifying for which tasks and which parts of the project.
 
 ## [Docker Compose](https://docs.docker.com/compose/)
  - 
+
+Reset Everything -  docker compose down -v --rmi all --remove-orphans;
+                    docker builder prune -af;
+                    docker compose up

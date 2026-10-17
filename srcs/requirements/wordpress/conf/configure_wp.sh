@@ -19,7 +19,7 @@ DB_USER='nkuydin'
 DB_ROOT='root_password'
 DB_PASS='p3l3meni'
 # wp_credentials.txt
-URL='nkuydin.42.fr'
+URL='https://nkuydin.42.fr'
 TITLE='INCEPTION'
 ADMIN_USER='wordpress'
 ADMIN_PASS='wordpress_pass'
@@ -32,7 +32,7 @@ WP_USER_ROLE='editor'
 
 pwd
 
-wp core download --allow-root --locale=en_US --allow-root --version='6.6'
+wp core download --allow-root --locale=en_US --version='6.6'
 
 wp core verify-checksums --allow-root --locale=en_US --version='6.6'
 
@@ -43,6 +43,17 @@ echo -e "Creating wp-config.php..."
 # touch /var/www/wordpress/wp-config.php
 
 cat << EOF > /var/www/html/wordpress/wp-config.php
+<?php
+/**
+ * The base configuration for WordPress
+ *
+ * This file contains the following configurations:
+ *
+ * * Database settings
+ * * Database table prefix
+ * * ABSPATH
+ */
+
 /** The name of the database for WordPress */
 define( 'DB_NAME', '${DB_NAME}' );
 /** MySQL database username */
@@ -72,8 +83,11 @@ define( 'WP_SITEURL', 'https://nkuydin.42.fr' );
 define( 'NOBLOGREDIRECT', 'https://nkuydin.42.fr' );
 
 /* That's all, stop editing! Happy blogging. */
+
 /** Absolute path to the WordPress directory. */
 if ( ! defined( 'ABSPATH' ) ) define( 'ABSPATH', __DIR__ . '/' );
+
+/** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
 EOF
 

@@ -11,6 +11,8 @@ services:
       - "9000"
     networks:
       default: {}
+    volumes:
+      - wp_content:/var/www/html/wordpress
     # secrets:
     #   - wordpress
     #   - database
@@ -23,6 +25,8 @@ services:
       - "3306"
     networks:
       default: {}
+    volumes:
+      - db_data:/var/lib/mysql/
     # secrets:
     #   - database
 
@@ -36,9 +40,27 @@ services:
       - "443:443"
     networks:
       default: {}
+    volumes:
+      - wp_content:/var/www/html/wordpress
 
 networks:
   default: {}
+
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HOME/data/db_data
+  wp_content:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $HOME/data/wp_content
+
+
 
 # secrets:
 #   database:

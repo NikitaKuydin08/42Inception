@@ -14,7 +14,7 @@ RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
     wp --info && echo -e "\033[0;32mCLI installation succeeded\033[0m"
 
 RUN sed -i '/listen = 127.0.0.1:9001/c\listen = 9000' /etc/php/8.2/fpm/pool.d/www.conf && \
-    cd /etc/php/8.2/fpm/pool.d/ && cat www.conf | grep listen
+    grep -q '^listen = 9000' /etc/php/8.2/fpm/pool.d/www.conf && echo -e "All good"
 
 COPY ./conf/ /tools
 RUN chmod +x /tools/configure_wp.sh

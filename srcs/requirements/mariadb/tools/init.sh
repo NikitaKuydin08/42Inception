@@ -14,9 +14,9 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 fi
 
 #db_credentials.txt
-DB_NAME=inception
+DB_NAME='inception'
 DB_USER='username'@'hostname'
-DB_USER=nkuydin
+DB_USER='nkuydin'
 DB_ROOT='root_password'
 DB_PASS='p3l3meni'
 
