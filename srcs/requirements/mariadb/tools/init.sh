@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# root@bc9f9b8926a5:/var/lib/mysql/performance_schema# cat db.opt
-# default-character-set=utf8mb3
-# default-collation=utf8mb3_general_ci
-
-
 if [ ! -d "/var/lib/mysql/mysql" ]; then 
     echo "Initialising data directory..."
     
@@ -13,14 +8,15 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 fi
 
-#db_credentials.txt
-DB_NAME='inception'
-DB_USER='username'@'hostname'
-DB_USER='nkuydin'
-DB_ROOT='root_password'
-DB_PASS='p3l3meni'
+extract_secret() {
+    grep "^$1" /run/secrets/database | cut -d= -f2
+}
 
-# DB_ROOT=$(cat /run/secrets/db_credentials | )
+DB_NAME=$(extract_secret DB_NAME)
+DB_MAIL=$(extract_secret DB_MAIL)
+DB_USER=$(extract_secret DB_USER)
+DB_ROOT=$(extract_secret DB_ROOT)
+DB_PASS=$(extract_secret DB_PASS)
 
 if [ ! -d "/var/lib/mysql/${DB_NAME}" ]; then
 mysqld_safe --skip-networking &

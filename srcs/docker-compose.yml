@@ -13,9 +13,9 @@ services:
       default: {}
     volumes:
       - wp_content:/var/www/html/wordpress
-    # secrets:
-    #   - wordpress
-    #   - database
+    secrets:
+      - wordpress
+      - database
     
   mariadb:
     build: requirements/mariadb
@@ -27,8 +27,8 @@ services:
       default: {}
     volumes:
       - db_data:/var/lib/mysql/
-    # secrets:
-    #   - database
+    secrets:
+      - database
 
   nginx:
     build: requirements/nginx
@@ -60,10 +60,8 @@ volumes:
       o: bind
       device: $HOME/data/wp_content
 
-
-
-# secrets:
-#   database:
-#     file: ./secrets/db_credentials.txt
-#   wordpress:
-#     file: ./secrets/wp_credentials.txt
+secrets:
+  database:
+    file: ../secrets/db_credentials.txt
+  wordpress:
+    file: ../secrets/wp_credentials.txt

@@ -13,24 +13,29 @@
 
 # user and hostname are www-data
 
-#db_credentials.txt
-DB_NAME='inception'
-DB_USER='nkuydin'
-DB_ROOT='root_password'
-DB_PASS='p3l3meni'
-# wp_credentials.txt
-URL='https://nkuydin.42.fr'
-TITLE='INCEPTION'
-ADMIN_USER='wordpress'
-ADMIN_PASS='wordpress_pass'
-ADMIN_EMAIL='wordpress@gmail.com'
-# wordpress create user
-WP_USER='wp_user'
-WP_PASS='wp_pass'
-WP_EMAIL='wp_email@gmail.com'
-WP_USER_ROLE='editor'
+extract_secret() {
+    grep "^$1" /run/secrets/database | cut -d= -f2
+}
 
-pwd
+extract_wp() {
+    grep "^$1" /run/secrets/wordpress | cut -d= -f2
+}
+
+DB_NAME=$(extract_secret DB_NAME)
+DB_USER=$(extract_secret DB_USER)
+DB_ROOT=$(extract_secret DB_ROOT)
+DB_PASS=$(extract_secret DB_PASS)
+
+URL=$(extract_wp URL)
+TITLE=$(extract_wp TITLE)
+ADMIN_USER=$(extract_wp ADMIN_USER)
+ADMIN_PASS=$(extract_wp ADMIN_PASS)
+ADMIN_EMAIL=$(extract_wp ADMIN_EMAIL)
+
+WP_USER=$(extract_wp WP_USER)
+WP_PASS=$(extract_wp WP_PASS)
+WP_EMAIL=$(extract_wp WP_EMAIL)
+WP_ROLE=$(extract_wp WP_USER_ROLE)
 
 wp core download --allow-root --locale=en_US --version='6.6'
 
@@ -39,8 +44,6 @@ wp core verify-checksums --allow-root --locale=en_US --version='6.6'
 if [ ! -f "/var/www/html/wordpress/wp-config.php" ]; then 
 
 echo -e "Creating wp-config.php..."
-
-# touch /var/www/wordpress/wp-config.php
 
 cat << EOF > /var/www/html/wordpress/wp-config.php
 <?php
@@ -105,10 +108,9 @@ wp core install --allow-root \
 
 wp core version --allow-root && echo -e "\033[0;32mSuccess: WordPress installed successfully. \033[0m"
 
-wp user create --allow-root $WP_USER $WP_EMAIL --user_pass=$WP_PASS --role=$WP_USER_ROLE
+wp user create --allow-root "$WP_USER" "$WP_EMAIL" --user_pass=$WP_PASS --role=$WP_ROLE
 
 wp user list --allow-root
-# [ "$(wp user list --allow-root | wc -l)" -eq 2 ] && echo -e "\033[0;32mTwo users created, wordpress set up\033[0m"
 
 fi
 

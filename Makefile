@@ -1,9 +1,10 @@
 # need to add a check and make sure that docker and docker compose are installed, otherwise install them
 
+DOMAIN = nkuydin.42.fr
 PATH_COMPOSE = ./srcs/docker-compose.yml
 COMPOSE = docker compose -f ${PATH_COMPOSE}
-# PATH_STORAGE = /home/nkuydin/data
-PATH_STORAGE = /Users/nkuydin
+HOME_PATH = ${HOME}
+TOOLS_DIR = ./srcs/requirements/tools
 
 .PHONY: all 
 all: up
@@ -14,22 +15,57 @@ fclean: clean
 .PHONY: re
 re: fclean all
 
+# create required directories, DNS resolving
 .PHONY: setup
 setup:
-	mkdir -p ${PATH_STORAGE}/data/wp_content
-	mkdir -p ${PATH_STORAGE}/data/db_data
+	bash ${TOOLS_DIR}/setup.sh
+	@if ! grep -q ${DOMAIN} "/etc/hosts"; then \
+		echo "127.0.0.1       ${DOMAIN}" | sudo tee -a /etc/hosts > /dev/null; \
+ 	fi
+	mkdir -p ${HOME_PATH}/data/wp_content
+	mkdir -p ${HOME_PATH}/data/db_data
 
-# creates everything and starts the services, builds images if required
+# Build everything to run the project
+#	- rebuilds the image after the change of Dockerfile
+#	- setting up the project for 1st time, builds images
+#	- updated dependencies
+.PHONY: build
+build: setup
+	${COMPOSE} build
+
+# Bring up the development environment
 .PHONY: up
 up: setup
 	${COMPOSE} up --detach
 
-# stops and removes the containers and networks
+# Run the development server
+.PHONY: start
+start:
+	${COMPOSE} start --wait
+
+# Stop the external services
 .PHONY: down
 down:
 	${COMPOSE} down
 
+# status of services
+.PHONY: status
+status:
+	${COMPOSE} ps -a
+
+# Shut down and remove services
 .PHONY: clean
-clean:
-	${COMPOSE} down -v --rmi all --remove-orphans || true
-	docker builder prune -af || true
+clean:	
+	-${COMPOSE} down -v --rmi all --remove-orphans
+	-docker builder prune -af
+	sudo rm -rf ${HOME_PATH}/data
+
+# Shut down and remove services, as well as networks and volumes
+.PHONY: fclean
+fclean: clean
+	-docker system prune -af --volumes
+	sudo sed -i '/$(DOMAIN)/d' /etc/hosts
+
+# clean up the project and launch from 0
+.PHONY: re
+re: fclean all
