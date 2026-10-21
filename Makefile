@@ -6,6 +6,10 @@ COMPOSE = docker compose -f ${PATH_COMPOSE}
 HOME_PATH = ${HOME}
 TOOLS_DIR = ./srcs/requirements/tools
 
+.PHONY: setup_secrets
+setup_secrets:
+	bash ${TOOLS_DIR}/setup.sh
+
 .PHONY: all 
 all: up
 
@@ -18,7 +22,6 @@ re: fclean all
 # create required directories, DNS resolving
 .PHONY: setup
 setup:
-	bash ${TOOLS_DIR}/setup.sh
 	@if ! grep -q ${DOMAIN} "/etc/hosts"; then \
 		echo "127.0.0.1       ${DOMAIN}" | sudo tee -a /etc/hosts > /dev/null; \
  	fi
