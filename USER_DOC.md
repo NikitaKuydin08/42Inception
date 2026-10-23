@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-User documentation 
-This file must explain, in clear and simple terms, how an end user or administrator can:
-◦ Understand what services are provided by the stack.
-◦ Start and stop the project.
-◦ Access the website and the administration panel.
-◦ Locate and manage credentials.
-◦ Check that the services are running correctly.
-=======
 # User documentation
  
 This document is for the people who use or administrate the website: no Docker knowledge is needed. Everything is run from the root folder of the repository.
@@ -81,4 +72,3 @@ Good to know:
    docker logs wordpress
    docker logs mariadb
 ```
->>>>>>> 1ee3f9b (Left: Revise Documentation, Final Check at VM, THEORY, THEORY)

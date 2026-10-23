@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-Developer documentation
-This file must describe how a developer can:
-◦ Set up the environment from scratch (prerequisites, configuration files, secrets).
-◦ Build and launch the project using the Makefile and Docker Compose.
-◦ Use relevant commands to manage the containers and volumes.
-◦ Identify where the project data is stored and how it persists.
-=======
 # Developer documentation
  
 This document explains how to set the project up from scratch, build it, manage it, and where its data lives. For the project overview and design choices, see [README.md](README.md). For day-to-day usage, see [USER_DOC.md](USER_DOC.md).
@@ -146,4 +138,3 @@ What happens to the data:
 | `make clean`, `make fclean`, `make re` | **deleted** |
  
 Since the data lives outside the containers and images, a container can be destroyed and recreated without losing the database or the website files. The first start initialises the database and installs WordPress from the secrets; the following starts reuse the data that is already there. Files in `~/data` are owned by the users of the containers (for example `mysql`, `www-data`), which is why the Makefile uses `sudo rm -rf` to delete them.
->>>>>>> 1ee3f9b (Left: Revise Documentation, Final Check at VM, THEORY, THEORY)
