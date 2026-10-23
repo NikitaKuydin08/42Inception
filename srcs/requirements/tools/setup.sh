@@ -24,3 +24,7 @@ DB_ROOT=
 DB_PASS=
 DB_MAIL=
 EOF
+
+cat << EOF > ./srcs/.env
+DOMAIN_NAME=
+EOF

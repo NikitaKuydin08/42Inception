@@ -8,7 +8,8 @@ services:
       DOMAIN_NAME: ${DOMAIN_NAME}
     restart: unless-stopped
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     expose:
       - "9000"
     networks:
@@ -31,15 +32,25 @@ services:
       - db_data:/var/lib/mysql/
     secrets:
       - database
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   nginx:
-    build: requirements/nginx
+    build: 
+      context: requirements/nginx
+      args: 
+        DOMAIN_NAME: ${DOMAIN_NAME}
     container_name: nginx
     restart: unless-stopped
     depends_on:
       - wordpress
     ports:
       - "443:443"
+    env_file: .env
     networks:
       default: {}
     volumes:
