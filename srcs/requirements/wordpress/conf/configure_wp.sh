@@ -81,9 +81,9 @@ define( 'WP_DEBUG_DISPLAY', false );
 /** Wordpress Instance's Prefix for one single database. */
 \$table_prefix = 'wp_';
 
-define( 'WP_SITEURL', 'https://nkuydin.42.fr' );
+define( 'WP_SITEURL', 'https://${DOMAIN_NAME}' );
 /** Redirect the User, if subdomain doesn't exist. */
-define( 'NOBLOGREDIRECT', 'https://nkuydin.42.fr' );
+define( 'NOBLOGREDIRECT', 'https://${DOMAIN_NAME}' );
 
 /* That's all, stop editing! Happy blogging. */
 

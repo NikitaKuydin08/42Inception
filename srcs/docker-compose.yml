@@ -4,6 +4,8 @@ services:
   wordpress:
     build: requirements/wordpress
     container_name: wordpress
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
     restart: unless-stopped
     depends_on:
       - mariadb
