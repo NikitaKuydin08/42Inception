@@ -1,27 +1,21 @@
 # need to add a check and make sure that docker and docker compose are installed, otherwise install them
 
-include /srcs/.env
+-include srcs/.env
 
 TOOLS_DIR = ./srcs/requirements/tools
-srcs/.env:
-	@bash ${TOOLS_DIR}/setup.sh > $@
+# srcs/.env:
+# 	@bash ${TOOLS_DIR}/setup.sh
 DOMAIN = ${DOMAIN_NAME}
 PATH_COMPOSE = ./srcs/docker-compose.yml
 COMPOSE = docker compose -f ${PATH_COMPOSE}
 HOME_PATH = ${HOME}
 
-.PHONY: setup_secrets
-setup_secrets:
-	bash ${TOOLS_DIR}/setup.sh
-
 .PHONY: all 
 all: up
 
-.PHONY: fclean
-fclean: clean
-
-.PHONY: re
-re: fclean all
+.PHONY: setup_secrets
+setup_secrets:
+	bash ${TOOLS_DIR}/setup.sh
 
 # create required directories, DNS resolving
 .PHONY: setup

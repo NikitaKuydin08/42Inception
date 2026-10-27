@@ -1,8 +1,8 @@
 #!/bin/bash
 
-mkdir -p ./secrets/ && cd ./secrets/
+mkdir -p ./secrets/
 
-cat << EOF > wp_credentials.txt
+cat << EOF > ./secrets/wp_credentials.txt
 # setting the wordpress up, creating root user
 URL=
 TITLE=
@@ -17,7 +17,7 @@ WP_EMAIL=
 WP_ROLE=
 EOF
 
-cat << EOF > db_credentials.txt
+cat << EOF > ./secrets/db_credentials.txt
 DB_NAME=
 DB_USER=
 DB_ROOT=
