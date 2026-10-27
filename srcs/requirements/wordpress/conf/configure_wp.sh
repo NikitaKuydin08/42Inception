@@ -26,7 +26,7 @@ DB_USER=$(extract_secret DB_USER)
 DB_ROOT=$(extract_secret DB_ROOT)
 DB_PASS=$(extract_secret DB_PASS)
 
-URL=$(extract_wp URL)
+# URL=$(extract_wp URL)
 TITLE=$(extract_wp TITLE)
 ADMIN_USER=$(extract_wp ADMIN_USER)
 ADMIN_PASS=$(extract_wp ADMIN_PASS)
@@ -100,7 +100,7 @@ echo -e "Waiting for MariaDB to be ready..."
 sleep 10
 
 wp core install --allow-root \
-                --url=$URL \
+                --url=$DOMAIN_NAME \
                 --title=$TITLE \
                 --admin_user=$ADMIN_USER \
                 --admin_password=$ADMIN_PASS \
