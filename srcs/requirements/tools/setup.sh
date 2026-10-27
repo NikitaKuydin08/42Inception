@@ -4,7 +4,6 @@ mkdir -p ./secrets/
 
 cat << EOF > ./secrets/wp_credentials.txt
 # setting the wordpress up, creating root user
-URL=
 TITLE=
 ADMIN_USER=
 ADMIN_PASS=

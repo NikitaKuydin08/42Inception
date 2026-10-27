@@ -26,7 +26,6 @@ DB_USER=$(extract_secret DB_USER)
 DB_ROOT=$(extract_secret DB_ROOT)
 DB_PASS=$(extract_secret DB_PASS)
 
-# URL=$(extract_wp URL)
 TITLE=$(extract_wp TITLE)
 ADMIN_USER=$(extract_wp ADMIN_USER)
 ADMIN_PASS=$(extract_wp ADMIN_PASS)
@@ -95,9 +94,6 @@ require_once(ABSPATH . 'wp-settings.php');
 EOF
 
 echo -e "\033[0;32mSuccess - wp-config.php created\033[0m"
-
-echo -e "Waiting for MariaDB to be ready..."
-sleep 10
 
 wp core install --allow-root \
                 --url=$DOMAIN_NAME \

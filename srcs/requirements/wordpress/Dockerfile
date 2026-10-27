@@ -1,9 +1,10 @@
 FROM debian:12
 
-RUN apt update && apt -y upgrade && apt -y install wget php8.2 \
+RUN apt update && apt -y upgrade && apt install -y --no-install-recommends wget php8.2 \
     php8.2-fpm \
     php8.2-cli \
     php8.2-mysql \
+    ca-certificates \
     mariadb-client && \
     rm -rf /var/lib/apt/lists/*
 
