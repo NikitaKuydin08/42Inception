@@ -15,7 +15,7 @@ The whole infrastucture is run by one file basically - srcs/docker-compose.yml a
 | Source | Role |
 |---|---|
 | `Makefile` | entry point, builds images, calls `docker compose` |
-| `srcs/docker-compose.yml` | services, network, volumes, secrets |
+| srcs/docker-compose.yml` | services, network, volumes, secrets |
 | `srcs/requirements/<service>/` | one Dockerfile per service, plus its `conf/` and `tools/` (entrypoint scripts) |
 | `secrets/` | passwords and credentials, ignored by Git |
 | `srcs/.env` | non-sensitive variables, ignored by Git |
@@ -28,40 +28,79 @@ The whole infrastucture is run by one file basically - srcs/docker-compose.yml a
 - **Credentials:** passwords sit in Docker secrets, nothing confidential is written in a Dockerfile or committed to Git.
 - **Crashes:** `restart: unless-stopped` on every service.
 
-Comparisons     
+### Comparisons     
 
 | | Virtual machine | Docker container |
 |---|---|---|
 | Defintion | Virtualisation of an entire machine (server) emulating the hardware components, such as the CPU, memory, NIC; Full OS | Open-Source Container platform; Container has its own file system, dependency structure, processes, network; Shares the underlying host OS kernel resources.
 | Objective | To allow users to create a virtual environment that's isolated from the underlying software. | To provide a lightweight and portable way to package and run applications in an isolated environment. 
 | The Use | Used in deploying possibly unsecure applications; Allows the use of hardware resources more efficiently. | Ease managing of software environment updates and maintaining environment consistency everywhere. Addresses the challenge of deploying applications across different environments. 
-| Isolation | Strong - Higher security. As a VM runs an entire operating system. | lighter (namespaces for what it sees, cgroups for what it uses) |
+| Isolation | Strong - Higher security. As a VM runs an entire operating system on top of Hypervisor. | lighter (namespaces for what it sees, cgroups for what it uses) |
 | Weight | gigabytes, boots in minutes | megabytes, starts in seconds |
 
-Virtual Machines vs Docker
+|.|.|.|
+|-|-|-|
+|.|.|.|
 
-A virtual machine emulates a full computer: a hypervisor runs a complete guest operating system with its own kernel on virtualised hardware. This gives strong isolation but is heavy (gigabytes of disk, minutes to boot, significant RAM overhead). A Docker container is only an isolated process (or group of processes) that shares the host's kernel; isolation is obtained with Linux namespaces (what the process can see) and cgroups (how much it can use). Containers are small, start in seconds and are easy to reproduce, but the isolation is weaker than a VM since the kernel is shared. In this project, the VM provides the host environment, and Docker is used inside it to run each service in a lightweight, reproducible unit.
+| | Environment variables | Docker secrets |
+|---|---|---|
+| Suitable For | Non-Sensitive data(domain name, database names) | Passwords & credentials. Data that can't be exposed to public and hackers |
+| Exposed By | `docker compose -f srcs/docker-compose.yml config` ; `docker history --no-trunc <image_name/id>` ; can be leaked in logs | Accessible only to authorized services, are never part of the image |
+| Stored | in the container's environment | mounted temporarily inside the container as files (in /run/secrets/<name>) |
 
-Secrets vs Environment Variables
+|.|.|.|
+|-|-|-|
+|.|.|.|
 
-Environment variables are simple and convenient, which makes them suitable for non-sensitive configuration (domain name, database name, usernames). However, they are easily exposed: they appear in docker inspect, in /proc/<pid>/environ, are inherited by child processes and can leak into logs or crash reports. Docker secrets are mounted inside the container as files (in /run/secrets/<name>), are only given to the services that explicitly request them, and are never part of the image or its metadata. This project uses secrets for passwords and credentials and environment variables (.env) for the rest.
+| | Docker Network (bridge)| Host Network |
+|---|---|---|
+| Common Use | Application runs in a container that needs to communicate with other containers on the same host. | Container needs to handle a large range of ports. |
+| Isolation | Complete. The container is hidden behind the virtual network interface. | None. Uses the host's networking directly. |
+| Ports Management | Requires port mapping (8080:80). Multiple containers can use same internal port 80 by mapping them to different host ports. | No NAT overhead. Ports are taken directly from host. All the ports should be unique. |
+| Inside->Outside World | Only the ports explicitly published, like nginx, are reachable from outside. | Every port the container opens is exposed |
+| Communication bw services | Access each other by name or alises. | Talk over real port numbers/localhost, no built-in DNS Resolver |
 
-Docker Network vs Host Network
+|.|.|.|
+|-|-|-|
+|.|.|.|
 
-With a user-defined Docker (bridge) network, containers get their own network namespace and private IP addresses, can reach each other by service name thanks to Docker's built-in DNS (e.g. wordpress reaches mariadb:3306), and only the ports explicitly published are reachable from outside. With the host network (network: host), the container shares the host's network stack: there is no isolation, ports can collide with host services, and every port the container opens is exposed. The host network (and links) is forbidden here; a dedicated Docker network is used so that only nginx is exposed, on port 443.
+| | Named volume | Bind mount |
+|---|---|---|
+|Created By | Docker (by default under /var/lib/docker/volumes/) | Managed by User |
+| Depends on Host Storage | No. Independent | Yes. Maps an existing host path in the container, which depends on the host's file structure and rights. |
+| Behaviour on creation(first time) | Copies data from the container to the volume, used for databases. | Overwrites container's data, the host's folder completely overshades contents inside container. |
+| The Use | Can be shared between containers easily. | When user needs data to be stored in the specific and comfortable folder on the host machine. |
+| Named Volumes with an driver_option: bind | Hybrid Mode(Our Case). Docekr cretaes a named Volume, but phusically saves data on the mentioned host's folder. | (N/A) |
 
-Docker Volumes vs Bind Mounts
+## INSTRUCTIONS
 
-A named volume is created and managed by Docker (by default under /var/lib/docker/volumes/), is independent of the host's directory layout, can be shared between containers and handled through the docker volume commands. A bind mount directly maps an existing host path into the container, which depends on the host's file structure and permissions. Bind mounts are convenient for development but less portable. This project uses named volumes (as required), configured with the local driver so that their data is stored in /home/<login>/data on the host while still being real Docker named volumes.
+1. Clone the repository and move into it:
+```sh
+   git clone <repository-url> 42Inception && cd 42Inception
+```
 
-• An “Instructions” section containing any relevant information about compilation,
-installation, and/or execution.
+2. Generate the secret templates and .env-file, then fill in every value in `secrets/db_credentials.txt` and `secrets/wp_credentials.txt` (the keys and rules are listed in [DEV_DOC.md](DEV_DOC.md)). These files are ignored by Git, and `make setup_secrets` overwrites them, so run it only once:
+```sh
+   make setup_secrets
+```
 
-• A “Resources” section listing classic references related to the topic (documen-
-tation, articles, tutorials, etc.), as well as a description of how AI was used —
-specifying for which tasks and which parts of the project.
+3. Build and start the whole infrastructure (this also adds `nkuydin.42.fr` to `/etc/hosts` and creates the data folders in `~/data`):
+```sh
+   make
+```
 
-## General (I guess)
+4. Open https://nkuydin.42.fr (accept the self-signed certificate warning). The administration panel is at https://nkuydin.42.fr/wp-admin.
+
+### Additional Information
+
+Stop the project with `make down` (data is kept). `make clean`, `make fclean` and `make re` also **delete all the data**.
+
+- [USER_DOC.md](USER_DOC.md): using and administrating the website (services, start/stop, access webiste and administration, credentials, checks).
+- [DEV_DOC.md](DEV_DOC.md): prerequisites, environment setup, Makefile rules, docker commands, how does the data persists.
+
+## RESOURCES
+
+### General (I guess)
  - [How containers like Docker work under the hood - Namespaces & Cgroups](https://blog.nginx.org/blog/what-are-namespaces-cgroups-how-do-they-work)
  - [Understanding Cgroups and Namespaces in Linux: The Foundations of Containerization](https://medium.com/@ozbillwang/understanding-cgroups-and-namespaces-in-linux-the-foundations-of-containerization-e0e565eb236e)
  - [Docker vs Virtual Machine (VM) – Key Differences You Should Know](https://www.freecodecamp.org/news/docker-vs-vm-key-differences-you-should-know/)
@@ -72,13 +111,15 @@ specifying for which tasks and which parts of the project.
  - [Domain does not exit error - DNS_PROBE_FINISHED_NXDOMAIN](https://developers.cloudflare.com/dns/troubleshooting/dns-probe-finished-nxdomain/)
  - [How to fix the problem above](https://www.plesk.com/blog/various/dns-probe-finished-nxdomain-what-is-it-and-how-to-fix-the-problem/)
  - [Define and manage networks in Docker Compose](https://docs.docker.com/reference/compose-file/networks/)
+ - [Rebuild separate service using docker-compose](https://stackoverflow.com/questions/36884991/how-to-rebuild-docker-container-in-docker-compose-yml)
+ - [Docker Compose Commands: Understanding 'up -d' vs 'up --build'](https://dev.to/yuvraajsj18/docker-compose-commands-understanding-up-d-vs-up-build-3bb4)
 
-## Haven't looked into it
+### Haven't looked into it
  - [Docker compose - LEMP stack](https://stackoverflow.com/questions/39678099/docker-compose-php-fpm-nginx-mysql-and-use-wp-cli-on-nginx)
  - [Reasons Why Containers can't talk to each other](https://maximorlov.com/4-reasons-why-your-docker-containers-cant-talk-to-each-other/?fbclid=IwAR3Q3VUS9wqJtE2fhbpFYOUD9jKw1p1Ajn10jTR6dbUP_rXkbyP2T2aUtmU)
  - [Manage Secrets Securely in Docker Compose](https://docs.docker.com/compose/how-tos/use-secrets/)
 
-## NGINX
+### [NGINX](https://nginx.org)
 
  - [SSL/TLS Protocol, Certificate.](https://aws.amazon.com/what-is/ssl-certificate/)
  - [Whats the difference between OpenSSL and LetsEncrypt?](https://stackoverflow.com/questions/44850725/whats-the-difference-between-openssl-and-letsencrypt)
@@ -94,7 +135,7 @@ specifying for which tasks and which parts of the project.
  - [Basic Understanding of The NGINX Configuration file Structure](https://www.digitalocean.com/community/tutorials/understanding-the-nginx-configuration-file-structure-and-configuration-contexts)
  - [Configure nginx PHP-FPM](https://linuxcapable.com/how-to-configure-nginx-php-fpm/#use-nginx-php-fpm-for-front-controller-applications)
 
-## [MariaDB Documentation](https://mariadb.com/docs)
+### [MariaDB Documentation](https://mariadb.com/docs)
  - [docker health check](https://www.dash0.com/guides/docker-health-check-a-practical-guide)
  - [Configuring optional("configuration") files](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/configuring-mariadb/configuring-mariadb-with-option-files)
  - [Starting MariaDB Server](https://dev.mysql.com/doc/mysql-security-excerpt/5.7/en/starting-server.html)
@@ -103,7 +144,7 @@ specifying for which tasks and which parts of the project.
  - [Ways to stop MySQL after running it using mysqld_safe?](https://stackoverflow.com/questions/53086514/how-to-stop-mysql-after-running-it-using-mysqld-safe)
  - [Another configuration of MariaDB website](https://docs.webdock.io/how-guides/database-guides/how-enable-remote-access-your-mariadbmysql-database/)
 
-## [WordPress](https://developer.wordpress.org)
+### [WordPress](https://developer.wordpress.org)
  - [Some PHP-FPM explanation](https://serversideup.net/open-source/docker-php/docs/image-variations/fpm)
  - [Setting up Wordpress through the terminal using WP-CLI(command line tool)](https://dev.to/kushang_tailor/wp-cli-the-terminal-way-to-wordpress-part-1-1lb6)
  - [Connecting Database mariadb to Wordpress/wp-config.php](https://blogvault.net/editing-wp-config-php/)
@@ -122,7 +163,5 @@ specifying for which tasks and which parts of the project.
  - [WordPress with WP-CLI](https://pantheon.io/learning-center/wordpress/install-with-wp-cli)
 
 ## Use Of AI
-
-Reset Everything -  docker compose down -v --rmi all --remove-orphans;
-                    docker builder prune -af;
-                    docker compose up
+ - AI have been used heavily to understand the difference between some aspects of the subject. Documentation was half written with AI, but have been extensively revised and changed to human, readable language. 
+ - It was used for the shell scripting, and understanding bash scripts. As well as translation of some Inception guides. 

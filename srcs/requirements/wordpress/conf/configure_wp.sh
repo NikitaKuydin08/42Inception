@@ -104,7 +104,7 @@ wp core install --allow-root \
 
 wp core version --allow-root && echo -e "\033[0;32mSuccess: WordPress installed successfully. \033[0m"
 
-wp user create --allow-root "$WP_USER" "$WP_EMAIL" --user_pass=$WP_PASS --role=$WP_ROLE
+wp user create --allow-root "$WP_USER" "$WP_EMAIL" --user_pass=$WP_PASS
 
 wp user list --allow-root
 
