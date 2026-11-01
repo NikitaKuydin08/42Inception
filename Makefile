@@ -37,7 +37,7 @@ build: setup
 # Bring up the development environment
 .PHONY: up
 up: setup
-	${COMPOSE} up --detach
+	${COMPOSE} up --detach --build
 
 # Run the development server
 .PHONY: start
@@ -59,12 +59,12 @@ status:
 clean:	
 	-${COMPOSE} down -v --rmi all --remove-orphans
 	-docker builder prune -af
-	sudo rm -rf ${HOME_PATH}/data
 
 # Shut down and remove services, as well as networks and volumes
 .PHONY: fclean
 fclean: clean
 	-docker system prune -af --volumes
+	sudo rm -rf ${HOME_PATH}/data
 	sudo sed -i '' '/$(DOMAIN)/d' /etc/hosts
 
 # clean up the project and launch from 0

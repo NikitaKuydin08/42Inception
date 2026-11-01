@@ -107,11 +107,25 @@ docker volume inspect srcs_db_data
 docker network ls
 docker network inspect srcs_default
 
+# images created exist
+docker images
+
+# no crash?
+docker compose -f srcs/docker-compose.yml logs
+
 # Kill one or more running containers
 docker kill <container_name>
 
 # provides detailed information on constructs(services) controlled by Docker
 docker inspect <container_name>
+
+# check if containers restart unless stopped
+PID=$(docker inspect -f '{{.State.Pid}}' mariadb)
+sudo kill -9 ${PID}
+sleep 10
+docker ps 
+        # or inspect the detailed info
+docker inspect -f 'restarts={{.RestartCount}} status={{.State.Status}}' mariadb
 ```
  
 Compose prefixes the resource names with the project name, which is `srcs` here (the folder of the Compose file). That is why the volumes are `srcs_db_data` and `srcs_wp_content`, and the network is `srcs_default`.
