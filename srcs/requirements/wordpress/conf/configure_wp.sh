@@ -34,7 +34,7 @@ ADMIN_EMAIL=$(extract_wp ADMIN_EMAIL)
 WP_USER=$(extract_wp WP_USER)
 WP_PASS=$(extract_wp WP_PASS)
 WP_EMAIL=$(extract_wp WP_EMAIL)
-WP_ROLE=$(extract_wp WP_USER_ROLE)
+# WP_ROLE=$(extract_wp WP_USER_ROLE)
 
 wp core download --allow-root --locale=en_US --version='6.6'
 

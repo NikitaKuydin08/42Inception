@@ -7,8 +7,8 @@ This document explains how to set the project up from scratch, build it, manage 
 ### Prerequisites
  
 - A Linux virtual machine with `make`, `sudo`, **Docker** and the **Docker Compose plugin** (`docker compose version` must work). The Makefile does not install them.
-- The Docker daemon running, and your user allowed to run `docker` without `sudo` (member of the `docker` group). `sudo` is only used by the Makefile to edit `/etc/hosts` and to delete the data folder.
-### Repository layout
+- The Docker daemon running, and your user allowed to run `docker`. `sudo` is only used by the Makefile to edit `/etc/hosts` and to delete the data folder.
+#### Repository layout
  
 ```
 .
@@ -28,7 +28,7 @@ This document explains how to set the project up from scratch, build it, manage 
  
 All the images are built from `debian:12`, and each service has its own Dockerfile.
  
-### Configuration files and secrets
+#### Configuration files and secrets
  
 `secrets/` and `srcs/.env` are listed in `.gitignore`, so they do not exist after a fresh clone. Generate the secret templates, then fill them in:
  
@@ -42,15 +42,17 @@ Format: one `KEY=value` per line, no quotes, no spaces around `=`.
  
 | File | Keys |
 |---|---|
-| `secrets/wp_credentials.txt` | `URL` (`https://nkuydin.42.fr`), `TITLE` (a single word), `ADMIN_USER`, `ADMIN_PASS`, `ADMIN_EMAIL`, `WP_USER`, `WP_PASS`, `WP_EMAIL`, `WP_ROLE` |
+| `secrets/wp_credentials.txt` | `TITLE` (a single word), `ADMIN_USER`, `ADMIN_PASS`, `ADMIN_EMAIL`, `WP_USER`, `WP_PASS`, `WP_EMAIL`, `WP_ROLE` |
 | `secrets/db_credentials.txt` | `DB_NAME`, `DB_USER`, `DB_ROOT` (root password), `DB_PASS`, `DB_MAIL` |
- 
+ ##### Rules:
 - `ADMIN_USER` must not contain `admin` or `administrator` (in any case).
-- Compose declares them as the secrets `wordpress` and `database` (`srcs/docker-compose.yml`). Inside the containers they appear as `/run/secrets/wordpress` and `/run/secrets/database`, and the entrypoint scripts read the values from there at start-up. No password is written in a Dockerfile or in the image.
-- The `wordpress` container receives both secrets, `mariadb` receives only `database`, and `nginx` receives none.
-### Domain name
- 
-The domain `nkuydin.42.fr` is defined in three places, which must be changed together if the login changes: `DOMAIN` in the `Makefile`, `server_name` in `srcs/requirements/nginx/conf/nkuydin-nginx.conf`, and `URL` in `secrets/wp_credentials.txt`. `make setup` adds it to `/etc/hosts` pointing to `127.0.0.1`.
+- All `user names` must be unique
+- `Emails` needs to be unique as well as have a `@` character in it
+- `Passwords` might be the same.
+ ##### Info:
+ - If the developer were to inject passwords and API keys as environment variables, he would risk unintentional infromation exposure, since it's built in image. Services can only access secrets `wordpress` and `database` when explicitly granted by `secrets` attribute within the `services` top-level element.
+ - The `wordpress` container has access to both secrets, `mariadb` to only `database`, and `nginx` to none.
+ - In the container, `/run/secrets/<secret_name>` is set to the contents of the file provided as a file path(i.e. `../secrets/db_credentials.txt`) under the secrets attribute. Special entrypoint scripts read the values from `/run/secrets/<secret_name>` at start-up.
  
 ## 2. Build and launch
  
@@ -80,7 +82,7 @@ docker compose -f srcs/docker-compose.yml up --detach
 | `make down` | Stop and remove the containers and the network. Volumes and data are **kept** |
 | `make status` | `docker compose ps -a` |
 | `make setup` | Domain in `/etc/hosts` and data folders |
-| `make setup_secrets` | Generate the empty secret templates |
+| `make setup_secrets` | Generate the empty secret templates. First time |
 | `make clean` | `down -v --rmi all --remove-orphans`, prune the build cache, delete `~/data`. **Erases all data** |
 | `make fclean` | `clean`, then `docker system prune -af --volumes` (everything unused on the Docker host) and remove the domain from `/etc/hosts` |
 | `make re` | `fclean`, then `all` |
@@ -104,6 +106,12 @@ docker volume ls
 docker volume inspect srcs_db_data
 docker network ls
 docker network inspect srcs_default
+
+# Kill one or more running containers
+docker kill <container_name>
+
+# provides detailed information on constructs(services) controlled by Docker
+docker inspect <container_name>
 ```
  
 Compose prefixes the resource names with the project name, which is `srcs` here (the folder of the Compose file). That is why the volumes are `srcs_db_data` and `srcs_wp_content`, and the network is `srcs_default`.

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# wrapper handles creation of the file, and socket works corectly, not mariadb
+mkdir -p /run/mysqld
+chown mysql:mysql /run/mysqld
+
 if [ ! -d "/var/lib/mysql/mysql" ]; then 
     echo "Initialising data directory..."
     
@@ -35,4 +39,5 @@ echo "Success: mariadb database [${DB_NAME}] is created and run"
 
 fi
 
-exec mysqld_safe
+# exec mysqld_safe - wrapper around mariadb, not subject compilant(takes PID 1, silent crashes)
+exec mariadbd --user=mysql

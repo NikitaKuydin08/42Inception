@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by nkuydin.*
+> *This project has been created as part of the 42 curriculum by nkuydin.*
 
 ## DESCRIPTION
 The goal of this project is to set up a small infrastructure composed of different services under specific rules, inside a virtual machine. 

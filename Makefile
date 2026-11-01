@@ -65,7 +65,7 @@ clean:
 .PHONY: fclean
 fclean: clean
 	-docker system prune -af --volumes
-	sudo sed -i '/$(DOMAIN)/d' /etc/hosts
+	sudo sed -i '' '/$(DOMAIN)/d' /etc/hosts
 
 # clean up the project and launch from 0
 .PHONY: re
