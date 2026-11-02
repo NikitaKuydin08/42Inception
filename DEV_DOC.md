@@ -126,6 +126,24 @@ sleep 10
 docker ps 
         # or inspect the detailed info
 docker inspect -f 'restarts={{.RestartCount}} status={{.State.Status}}' mariadb
+
+# demonstrating TLS v1.2 or TLS v1.3 certificate is used server_name = nkuydin.42.fr, port = 443
+openssl s_client -connect <server_name>:port
+
+# how to login into database, start the client CLI program (server already running as PID)
+docker compose -f srcs/docker-compose.yml exec mariadb mariadb -u <db_user> -p
+
+#show that the database is not empty
+SHOW DATABASES;
+USE <databse_name>;
+SHOW TABLES;
+SELECT * FROM <table_name>;
+
+# switch to another database
+USE <database_name>;
+
+# exit
+exit + Enter
 ```
  
 Compose prefixes the resource names with the project name, which is `srcs` here (the folder of the Compose file). That is why the volumes are `srcs_db_data` and `srcs_wp_content`, and the network is `srcs_default`.
